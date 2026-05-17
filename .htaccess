@@ -1,0 +1,16 @@
+# Προστασία ευαίσθητων φακέλων
+<FilesMatch "\.(sql|md|json|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Απόκρυψη config & logs
+RedirectMatch 403 ^.*/config/.*$
+RedirectMatch 403 ^.*/logs/.*$
+RedirectMatch 403 ^.*/vendor/.*$
+RedirectMatch 403 ^.*/cron/.*\.php$
+
+# UTF-8
+AddDefaultCharset UTF-8
+
+# Default index
+DirectoryIndex index.php

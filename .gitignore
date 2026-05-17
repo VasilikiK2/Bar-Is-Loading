@@ -1,0 +1,8 @@
+/vendor/
+/logs/*.log
+/reports/*.xlsx
+/config/config.php
+.env
+.DS_Store
+Thumbs.db
+*.swp
