@@ -207,9 +207,30 @@ HTML;
 function email_template_welcome(array $member, string $gym_name, bool $include_barcode = true): string {
     $first = clean($member['first_name']);
     $barcode = clean($member['barcode']);
+    $membership_type = $member['membership_type'] ?? '';
+
     $barcode_img = $include_barcode
         ? '<div style="text-align:center;margin:24px 0;background:#fff;padding:16px;border-radius:8px;border:1px solid #ddd"><img src="cid:barcode_img" alt="Barcode" style="max-width:320px;height:auto"></div>'
         : '';
+
+    $action_block = '';
+    if ($membership_type === 'personal') {
+        $action_block = <<<BOOKING
+<div style="background:#e8f4fd;border-left:4px solid #0d6efd;padding:16px;margin:24px 0;border-radius:4px">
+  <p style="margin:0 0 8px 0">📅 <strong>Κλείσε την ώρα σου</strong></p>
+  <p style="margin:0 0 12px 0">Ως μέλος Personal Training, μπορείς να κλείνεις τις ώρες σου online από το παρακάτω link:</p>
+  <a href="https://booking-bar-is-loading.pages.dev/" style="display:inline-block;background:#0d6efd;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:bold">Κλείσε την ώρα σου →</a>
+</div>
+BOOKING;
+    } elseif ($membership_type === 'open_gym') {
+        $action_block = <<<LIVE
+<div style="background:#e8f4fd;border-left:4px solid #0d6efd;padding:16px;margin:24px 0;border-radius:4px">
+  <p style="margin:0 0 8px 0">🏋️ <strong>Live εικόνα γυμναστηρίου</strong></p>
+  <p style="margin:0 0 12px 0">Στο παρακάτω link θα μπορείς να βλέπεις πόσα άτομα είναι στο γυμναστήριο εκείνη τη στιγμή ώστε να ξέρεις πότε είναι η καλύτερη ώρα να έρθεις και να ευχαριστηθείς την προπόνησή σου!</p>
+  <a href="https://live.barisloading.com/gym-system/live.php" style="display:inline-block;background:#0d6efd;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:bold">Δες live την κίνηση στο γυμναστήριο →</a>
+</div>
+LIVE;
+    }
 
     $content = <<<HTML
 <h2 style="color:#0d6efd;margin-top:0">Καλώς ήρθες, $first! 🎉</h2>
@@ -223,9 +244,10 @@ $barcode_img
 <h3>Τι ακολουθεί;</h3>
 <ul>
   <li>Φέρε αυτό το email (ή την εκτυπωμένη κάρτα) στην επόμενη επίσκεψη.</li>
-  <li>Σκάναρε το barcode στην είσοδο κάθε φορά που έρχεσαι για προπόνηση.</li>
+  <li>Σκάναρε το barcode στην είσοδο και στην έξοδο κάθε φορά που έρχεσαι για προπόνηση.</li>
   <li>Σε ένα μήνα θα λάβεις υπενθύμιση για ανανέωση συνδρομής.</li>
 </ul>
+$action_block
 <p>Καλές προπονήσεις! 💪</p>
 HTML;
 

@@ -62,11 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Στείλε welcome email
             $member = [
-                'id' => $member_id,
-                'first_name' => $first_name,
-                'last_name'  => $last_name,
-                'email'      => $email,
-                'barcode'    => $barcode,
+                'id'              => $member_id,
+                'first_name'      => $first_name,
+                'last_name'       => $last_name,
+                'email'           => $email,
+                'barcode'         => $barcode,
+                'membership_type' => $type,
             ];
             $barcode_url = SITE_URL . '/barcode.php?code=' . urlencode($barcode);
             send_welcome_email($member, $barcode_url);

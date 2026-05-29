@@ -42,15 +42,16 @@ $stmt = $pdo->prepare("
     SELECT m.*
     FROM members m
     WHERE m.status = 'active'
-      AND DATE(m.registration_date) = DATE_SUB(?, INTERVAL ? DAY)
+      AND DATE(m.registration_date) <= DATE_SUB(?, INTERVAL ? DAY)
+      AND DATE(m.registration_date) >= DATE_SUB(?, INTERVAL (? + 7) DAY)
       AND NOT EXISTS (
           SELECT 1 FROM email_log el
           WHERE el.member_id = m.id
             AND el.email_type = 'payment_reminder'
-            AND DATE(el.sent_at) = ?
+            AND DATE(el.sent_at) >= DATE_SUB(?, INTERVAL 7 DAY)
       )
 ");
-$stmt->execute([$today, REMINDER_DAYS_AFTER, $today]);
+$stmt->execute([$today, REMINDER_DAYS_AFTER, $today, REMINDER_DAYS_AFTER, $today]);
 $rows = $stmt->fetchAll();
 
 foreach ($rows as $member) {
@@ -60,7 +61,7 @@ foreach ($rows as $member) {
     else { $failed++; echo "FAILED\n"; }
 }
 
-// --- 2. Open Gym που λήγει σήμερα ή τις επόμενες 3 ημέρες
+// --- 2. Open Gym που λήγει σήμερα ή τις επόμενες 5 ημέρες
 $stmt = $pdo->prepare("
     SELECT DISTINCT m.*
     FROM members m
@@ -68,12 +69,12 @@ $stmt = $pdo->prepare("
     WHERE m.status = 'active'
       AND ms.is_active = 1
       AND ms.type = 'open_gym'
-      AND ms.end_date BETWEEN ? AND DATE_ADD(?, INTERVAL 3 DAY)
+      AND ms.end_date BETWEEN ? AND DATE_ADD(?, INTERVAL 5 DAY)
       AND NOT EXISTS (
           SELECT 1 FROM email_log el
           WHERE el.member_id = m.id
             AND el.email_type = 'payment_reminder'
-            AND DATE(el.sent_at) >= DATE_SUB(?, INTERVAL 5 DAY)
+            AND DATE(el.sent_at) >= DATE_SUB(?, INTERVAL 7 DAY)
       )
 ");
 $stmt->execute([$today, $today, $today]);

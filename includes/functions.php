@@ -242,9 +242,11 @@ function process_checkin(string $barcode): array {
 function current_occupancy(): int {
     auto_checkout_stale();
     return (int)db()->query(
-        "SELECT COUNT(*) FROM checkins
-         WHERE checkout_time IS NULL
-           AND checkin_time > DATE_SUB(NOW(), INTERVAL 6 HOUR)"
+        "SELECT COUNT(*) FROM checkins c
+         JOIN memberships m ON m.id = c.membership_id
+         WHERE c.checkout_time IS NULL
+           AND c.checkin_time > DATE_SUB(NOW(), INTERVAL 6 HOUR)
+           AND m.type = 'open_gym'"
     )->fetchColumn();
 }
 
@@ -254,11 +256,13 @@ function current_occupancy(): int {
  */
 function hourly_traffic_pattern(): array {
     $rows = db()->query(
-        "SELECT HOUR(checkin_time) AS h, COUNT(*) AS n,
-                COUNT(DISTINCT DATE(checkin_time)) AS days
-         FROM checkins
-         WHERE checkin_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-         GROUP BY HOUR(checkin_time)"
+        "SELECT HOUR(c.checkin_time) AS h, COUNT(*) AS n,
+                COUNT(DISTINCT DATE(c.checkin_time)) AS days
+         FROM checkins c
+         JOIN memberships m ON m.id = c.membership_id
+         WHERE c.checkin_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+           AND m.type = 'open_gym'
+         GROUP BY HOUR(c.checkin_time)"
     )->fetchAll();
 
     $pattern = array_fill(0, 24, 0.0);
